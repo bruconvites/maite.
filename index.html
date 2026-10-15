@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Convite - Maitê 2 anos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: Arial, Helvetica, sans-serif; }
+
+  .page { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #000; }
+  .page.active { display: flex; }
+
+  /* Palco com proporção 9:16, sempre inteiro na tela */
+  .stage { position: relative; width: min(100vw, calc(100dvh * 9 / 16)); aspect-ratio: 9 / 16; }
+  .stage img { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-drag: none; }
+
+  .hotspot { position: absolute; display: block; cursor: pointer; background: transparent; border: 0; border-radius: 14px; }
+
+  /* Página 1: toque em qualquer lugar */
+  #primeira { cursor: pointer; }
+  #primeira .hotspot { inset: 0; border-radius: 0; }
+
+  /* Vídeo */
+  #intro video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+  #pular {
+    position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 10; padding: 12px 20px; border: 0; border-radius: 999px; cursor: pointer;
+    background: rgba(0, 0, 0, .6); color: #fff; font-size: 15px; font-weight: 600;
+    backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,.4);
+  }
+  #pular:hover { background: rgba(0, 0, 0, .8); }
+
+  /* Botões da página interativa (posições em % da imagem) */
+  #btnConfirmar { left: 4%;    top: 69%; width: 27%; height: 16%; }
+  #btnLocal     { left: 35.5%; top: 69%; width: 25%; height: 16%; }
+  #btnPresentes { left: 62.5%; top: 69%; width: 27%; height: 16%; }
+
+  /* Botão voltar na página de presentes */
+  #btnVoltar    { left: 27%;   top: 2%;  width: 46%; height: 7.5%; }
+</style>
+</head>
+<body>
+
+<!-- 1) Primeira página -->
+<section id="primeira" class="page active">
+  <div class="stage">
+    <img src="primeira.jpg" alt="Clique no envelope para abrir seu convite">
+    <a class="hotspot" id="abrir" role="button" aria-label="Abrir convite"></a>
+  </div>
+</section>
+
+<!-- 2) Vídeo -->
+<section id="intro" class="page">
+  <video id="video" src="video.mp4" playsinline preload="auto"></video>
+  <button id="pular" type="button">Pular introdução</button>
+</section>
+
+<!-- 3) Convite interativo -->
+<section id="interativa" class="page">
+  <div class="stage">
+    <img src="interativa.jpg" alt="Convite Maitê 2 anos">
+    <a class="hotspot" id="btnConfirmar" href="https://wa.link/bdi5su" target="_blank" rel="noopener" aria-label="Confirme sua presença"></a>
+    <a class="hotspot" id="btnLocal" href="https://www.google.com/maps/place/Festou+Kids+Casa+de+Festas/@-22.938377,-43.3396688,1038m/data=!3m2!1e3!4b1!4m6!3m5!1s0x9bd900305f7b6d:0x558d4008478cfc0c!8m2!3d-22.938377!4d-43.3396688!16s%2Fg%2F11wx_8l49v?entry=ttu&g_ep=EgoyMDI2MDkxNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="Ver localização"></a>
+    <a class="hotspot" id="btnPresentes" role="button" aria-label="Dicas de presente"></a>
+  </div>
+</section>
+
+<!-- 4) Sugestões de presente -->
+<section id="presentes" class="page">
+  <div class="stage">
+    <img src="presentes.jpg" alt="Sugestões de presente">
+    <a class="hotspot" id="btnVoltar" role="button" aria-label="Voltar ao convite"></a>
+  </div>
+</section>
+
+<script>
+  const pages = {
+    primeira: document.getElementById('primeira'),
+    intro: document.getElementById('intro'),
+    interativa: document.getElementById('interativa'),
+    presentes: document.getElementById('presentes')
+  };
+  const video = document.getElementById('video');
+
+  function show(name) {
+    Object.values(pages).forEach(p => p.classList.remove('active'));
+    pages[name].classList.add('active');
+  }
+
+  function irParaConvite() {
+    video.pause();
+    show('interativa');
+  }
+
+  // Clique em qualquer parte da primeira página inicia o vídeo
+  pages.primeira.addEventListener('click', () => {
+    show('intro');
+    video.currentTime = 0;
+    video.play().catch(() => {
+      // Caso o navegador bloqueie o som, tenta sem áudio
+      video.muted = true;
+      video.play().catch(irParaConvite);
+    });
+  });
+
+  // Pular introdução
+  document.getElementById('pular').addEventListener('click', irParaConvite);
+
+  // Ao terminar o vídeo, abre o convite
+  video.addEventListener('ended', irParaConvite);
+  video.addEventListener('error', irParaConvite);
+
+  // Dicas de presente
+  document.getElementById('btnPresentes').addEventListener('click', () => show('presentes'));
+
+  // Voltar ao convite
+  document.getElementById('btnVoltar').addEventListener('click', () => show('interativa'));
+</script>
+</body>
+</html>
